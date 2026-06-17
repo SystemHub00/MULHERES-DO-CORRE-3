@@ -428,7 +428,6 @@ TEMPLATE_WIZARD = """\
     <!-- ═══ HEADER ═══ -->
     <header class="main-header">
         <div class="header-logos">
-            <img src="/static/logo_fgm.png" alt="Logo FGM" class="logo">
             <img src="/static/logo-prefeitura.png" alt="Prefeitura do Rio" class="logo-prefeitura-topo">
         </div>
     </header>
