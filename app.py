@@ -428,6 +428,7 @@ TEMPLATE_WIZARD = """\
     <!-- ═══ HEADER ═══ -->
     <header class="main-header">
         <div class="header-logos">
+            <img src="/static/logo_fgm.png" alt="Logo FGM" class="logo">
             <img src="/static/logo-prefeitura.png" alt="Prefeitura do Rio" class="logo-prefeitura-topo">
         </div>
     </header>
@@ -627,7 +628,7 @@ TEMPLATE_WIZARD = """\
                             <!-- 3. Selecionar turma -->
                             <div class="form-group full" id="turma-select-group" style="display:none;">
                                 <label for="turma_select">Selecione a turma *</label>
-                                <select id="turma_select" name="opcao_id">
+                                <select id="turma_select">
                                     <option value="">Selecione uma turma</option>
                                 </select>
                                 <div class="balao-erro" id="opcao_id-error"
@@ -635,6 +636,9 @@ TEMPLATE_WIZARD = """\
                                     {{ errors.get('opcao_id', '') }}
                                 </div>
                             </div>
+
+                            <!-- Hidden field para opcao_id quando turma é auto-selecionada -->
+                            <input type="hidden" id="hidden_opcao_id" name="opcao_id" value="{{ form_data.get('opcao_id', '') }}">
 
                             <!-- Campos informativos -->
                             <div class="form-group full" id="info-curso-group" style="display:none;">
@@ -888,12 +892,17 @@ TEMPLATE_WIZARD = """\
             function aplicarOpcaoCurso(optionId){
                 var option = courseOptionsById[String(optionId || '')];
                 if (!option){
+                    var hiddenOpcao = document.getElementById('hidden_opcao_id');
+                    if (hiddenOpcao) hiddenOpcao.value = '';
                     cursoInput.value = ''; turmaInput.value = ''; localInput.value = '';
                     diasAulaInput.value = ''; horarioInput.value = '';
                     dataInicioInput.value = ''; encerramentoInput.value = ''; enderecoInput.value = '';
                     mostrarInfoCurso(false);
                     return;
                 }
+                // update hidden opcao_id field
+                var hiddenOpcao = document.getElementById('hidden_opcao_id');
+                if (hiddenOpcao) hiddenOpcao.value = optionId;
                 cursoInput.value        = option.curso;
                 turmaInput.value        = option.turma;
                 localInput.value        = option.local;
@@ -1083,7 +1092,12 @@ TEMPLATE_WIZARD = """\
 
             cursoSelect.addEventListener('change',function(){atualizarLocais();syncReview();});
             localSelectEl.addEventListener('change',function(){atualizarTurmas();syncReview();});
-            turmaSelect.addEventListener('change',function(){aplicarOpcaoCurso(turmaSelect.value);syncReview();});
+            turmaSelect.addEventListener('change',function(){
+                aplicarOpcaoCurso(turmaSelect.value);
+                var hiddenOpcao = document.getElementById('hidden_opcao_id');
+                if (hiddenOpcao) hiddenOpcao.value = turmaSelect.value;
+                syncReview();
+            });
 
             ['nome','genero','whatsapp','cep','bairro','email','curso','turma',
              'dias_aula','horario','data_inicio','encerramento','endereco_curso','como_conheceu'
